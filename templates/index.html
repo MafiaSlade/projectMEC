@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thirukkural Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+        }
+        .container {
+            position: relative;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        p {
+            text-align: center;
+            color: #555;
+        }
+        form {
+            text-align: center;
+            margin-top: 20px;
+        }
+        input[type="number"] {
+            text-align: start;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button[type="submit"] {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        #kuralDetails {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f2f2f2;
+        }
+        #speechButton {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #speechButton:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Thirukkural Chatbot</h1>
+        <p>Enter the number of the Thirukkural to get its details:</p>
+        <form id="kuralForm">
+            <input type="number" id="kuralNumber" name="number" min="1" max="1330" required>
+            <button type="submit">Get Kural</button>
+        </form>
+        <div id="kuralDetails"></div>
+    </div>
+
+    <button id="speechButton">Speak</button>
+
+    <script>
+        document.getElementById('kuralForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            let kuralNumber = document.getElementById('kuralNumber').value;
+            fetch('/get_kural', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'number=' + kuralNumber
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('kuralDetails').innerHTML = `<p>${data.error}</p>`;
+                } else {
+                    document.getElementById('kuralDetails').innerHTML = `<p><strong>Kural Number:</strong> ${data.number}</p>
+                                                                        <p>${data.line1}</p>
+                                                                        <p>${data.line2}</p>
+                                                                        <p><strong>Translation:</strong> ${data.translation}</p>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        // Speech Assistance
+        document.getElementById('speechButton').addEventListener('click', function() {
+            let translation = document.querySelector('#kuralDetails p:last-child').textContent;
+            if ('speechSynthesis' in window) {
+                let speech = new SpeechSynthesisUtterance(translation);
+                speech.lang = 'ta-IN'; // Set the language to Tamil
+                window.speechSynthesis.speak(speech);
+            } else {
+                alert('Speech synthesis is not supported in your browser.');
+            }
+        });
+    </script>
+</body>
+</html>
